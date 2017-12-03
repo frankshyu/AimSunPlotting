@@ -96,7 +96,7 @@ def removeSubsetPaths(pathAccumTime, pathAccumCount):
       newPathAccumCount[key]= pathAccumCount[key]
   return newPathAccumTime, newPathAccumCount
 
-def extractSingleDB(fileName, thisPercentage, debug):
+def extractSingleDB(fileName, thisPercentage, debug, oriId, desId):
   #----------------------------------------------------------#
   # Helper function to traverse single SQLite DB and return  #
   # the average travel time of different paths               #
@@ -139,7 +139,7 @@ def extractSingleDB(fileName, thisPercentage, debug):
 
   con = sqlite3.connect(fileName)
   cur = con.cursor()
-  cur.execute('SELECT oid, (exitTime - entranceTime) FROM MIVEHTRAJECTORY WHERE exitTime != -1 AND entranceTime > 0')
+  cur.execute('SELECT oid, (exitTime - entranceTime) FROM MIVEHTRAJECTORY WHERE exitTime != -1 AND entranceTime > 0 AND origin = {} AND destination = {}'.format(oriId, desId))
   vehTTime = cur.fetchall()
   con.close()
   # Then, for each car, we lookup the travel time and add the result#
@@ -231,13 +231,15 @@ def traverseMultiDB(fileList, debug):
   oriId, desId  = getODPair(fileList[0])
   for filename in fileList:
     thisPercentage  = getPercentage(filename)
-    thisPathAvgTime, thisPathFlow, thisNonEnter, thisStuckCount = extractSingleDB(filename, thisPercentage, debug)
+    thisPathAvgTime, thisPathFlow, thisNonEnter, thisStuckCount = \
+      extractSingleDB(filename, thisPercentage, debug, oriId, desId)
     percentage.append(thisPercentage)
     pathAvgTime.append(thisPathAvgTime)
     pathFlow.append(thisPathFlow)
     countStuck.append(thisStuckCount)
     countNonEnter.append(thisNonEnter)
-  percentage, pathAvgTime, pathFlow, commonKeys, countNonEnter, countStuck = sortBasedOnPercentage(percentage, pathAvgTime, pathFlow, countNonEnter, countStuck)
+  percentage, pathAvgTime, pathFlow, commonKeys, countNonEnter, countStuck = \
+    sortBasedOnPercentage(percentage, pathAvgTime, pathFlow, countNonEnter, countStuck)
   return percentage, pathAvgTime, pathFlow, commonKeys, countNonEnter, countStuck
 
 def getColorChoices():
