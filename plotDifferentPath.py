@@ -121,7 +121,10 @@ def extractSingleDB(fileName, thisPercentage, debug):
   vehPathDict = {}
   for i in xrange(len(rows)):
     thisOid = rows[i][0]
-    if lastOid != thisOid:
+    if i == (len(rows) - 1 ):
+      pathSet = frozenset(pathList)
+      vehPathDict[thisOid] = pathSet
+    elif lastOid != thisOid:
   # Completed finding the path for 1 single car, record the results #
       pathSet = frozenset(pathList)
       vehPathDict[lastOid] = pathSet
