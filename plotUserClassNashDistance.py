@@ -97,7 +97,6 @@ def extractSingleDB(fileName, thisPercentage, debug):
     else: 
       nonAppTTime += (row[3] - row[2])
     totalTTime += thisTTime
-  print("minTTime is {}".format(minTTime))
   absNashDistance = totalTTime/(numApp + numNonApp) - minTTime
   rltNashDistance = 100*absNashDistance/minTTime
   appTTime    /= numApp
