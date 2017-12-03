@@ -194,6 +194,30 @@ def sortBasedOnPercentage(percentage, pathAvgTime, pathFlow, countNonEnter, coun
   print('==========================================')
   return sPercentage, sPathAvgTime, sPathFlow, commonKeys, sCountNonEnter, sCountStuck
 
+def getODPair(fileName):
+  con = sqlite3.connect(fileName)
+  cur = con.cursor()
+  cur.execute('SELECT origin, destination FROM MIVEHTRAJECTORY')
+  rows = cur.fetchall()
+  con.close()
+  currId  = 0
+  idOdDict= {}
+  idODict = {}
+  idDDict = {}
+  for row in rows:
+    thisSet = frozenset([row[0], row[1]])
+    if thisSet not in idOdDict.values():
+      idOdDict[currId] = thisSet
+      idODict[currId]  = row[0]
+      idDDict[currId]  = row[1]
+      currId += 1
+    del thisSet
+  for key, value in idOdDict.items():
+    print("{}, {}".format(key, value))
+  desiredId = input("please enter your desired O/D\n")
+  print("desired od is {}, {}".format(idODict[desiredId], idDDict[desiredId]))
+  return idODict[desiredId], idDDict[desiredId]
+
 def traverseMultiDB(fileList, debug):
   #----------------------------------------------------------#
   # Traverses multiple DB and return the average travel time #
@@ -204,6 +228,7 @@ def traverseMultiDB(fileList, debug):
   pathFlow   = []
   countStuck = []
   countNonEnter = []
+  oriId, desId  = getODPair(fileList[0])
   for filename in fileList:
     thisPercentage  = getPercentage(filename)
     thisPathAvgTime, thisPathFlow, thisNonEnter, thisStuckCount = extractSingleDB(filename, thisPercentage, debug)
