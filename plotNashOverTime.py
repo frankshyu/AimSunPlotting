@@ -66,7 +66,7 @@ def getNumVehicles(fileName):
   con = sqlite3.connect(fileName)
   cur = con.cursor()
   # oid = object id, sid = class
-  cur.execute('SELECT oid, sid FROM MIVEHTRAJECTORY WHERE (entranceTime > 0 AND exitTime > 0)')
+  cur.execute('SELECT oid, sid FROM MIVEHTRAJECTORY WHERE entranceTime > 0 AND exitTime > 0')
   rows = cur.fetchall()
   con.close()
   appCount    = 0
@@ -97,7 +97,7 @@ def removeSubsetPaths(pathAccumTime, pathAccumCount):
       newPathAccumCount[key]= pathAccumCount[key]
   return newPathAccumTime, newPathAccumCount
 
-def extractSingleDB(fileName, thisPercentage, debug, oriId, desId):
+def extractSingleDB(fileName, thisPercentage, debug, oriId, desId, maxT):
   #----------------------------------------------------------#
   # Helper function to traverse single SQLite DB and return  #
   # the average travel time of different paths               #
@@ -113,7 +113,7 @@ def extractSingleDB(fileName, thisPercentage, debug, oriId, desId):
 
   con = sqlite3.connect(fileName)
   cur = con.cursor()
-  cur.execute('SELECT oid, entranceTime, (exitTime - entranceTime) FROM MIVEHTRAJECTORY WHERE exitTime != -1 AND entranceTime > 0 AND entranceTime < 7200 AND origin = {} AND destination = {}'.format(oriId, desId))
+  cur.execute('SELECT oid, entranceTime, (exitTime - entranceTime) FROM MIVEHTRAJECTORY WHERE exitTime != -1 AND entranceTime > 0 AND entranceTime < {} AND origin = {} AND destination = {}'.format(maxT, oriId, desId))
   vehTTime = cur.fetchall()
   con.close()
   # Key: essentially the timestep (tStep below), this is because we are #
@@ -180,7 +180,7 @@ def getODPair(fileName):
   print("desired od is {}, {}".format(idODict[desiredId], idDDict[desiredId]))
   return idODict[desiredId], idDDict[desiredId]
 
-def traverseMultiDB(fileList, debug):
+def traverseMultiDB(fileList, debug, maxT):
   #----------------------------------------------------------#
   # Traverses multiple DB and return the average travel time #
   # (i.e. TTime) of app users and non-app users              #
@@ -193,7 +193,7 @@ def traverseMultiDB(fileList, debug):
   for filename in fileList:
     thisPercentage  = getPercentage(filename)
     thisTStep, thisAbsNash, thisRltNash = \
-      extractSingleDB(filename, thisPercentage, debug, oriId, desId)
+      extractSingleDB(filename, thisPercentage, debug, oriId, desId, maxT)
     percentage.append(thisPercentage)
     absNash.append(thisAbsNash)
     rltNash.append(thisRltNash)
@@ -261,20 +261,22 @@ def getCsvOutputName(dirName):
   return thisName
 
 def printUsage(): 
-  print('usage: \n python extractMultiSQLite.py directoryName showAllMessages')
+  print('usage: \n python extractMultiSQLite.py directoryName showAllMessages maxEntranceTime')
   print('directoryName: the directory in which the sqlite databases are stored')
   print('showAllMessages: use "true" to output all messages, recommended')
+  print('maxEntranceTime: the maximum time cars are allowed to enter the network')
   print('system exiting...')
   sys.exit() 
 
 # Main code starts here
 if __name__ == '__main__':
-  if len(sys.argv) != 3:
+  if len(sys.argv) != 4:
     printUsage()
   dirName  = sys.argv[1]
   debug    = sys.argv[2]
+  maxEntranceTime = float(sys.argv[3])
   outName  = getCsvOutputName(dirName)
   fileList = getAllFilenames(dirName)
   dm.printObjFiles(fileList, debug)
-  percentage, timeStep, absNash, rltNash = traverseMultiDB(fileList, debug)
+  percentage, timeStep, absNash, rltNash = traverseMultiDB(fileList, debug, maxEntranceTime)
   generatePlot(percentage, timeStep, absNash, rltNash)
