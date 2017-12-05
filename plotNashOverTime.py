@@ -238,11 +238,11 @@ def generatePlot(percentage, timeStep, absNash, rltNash):
     thisAx.set_ylim(0, max(absNash[i])*1.1)
     # THIS LINE IS ONLY FOR PLOTTING A SINGLE LINE THAT REPRESENTS THE #
     # START OF THE ACCIDENT, THIS IS NOT FOR ANY GENERALIZED PLOTTING! #
-    thisAx.plot([30, 30], [0, max(absNash[i])*1.1], color = (1,0,0), dashes = [2, 2], linewidth = 2.0)
+    thisAx.plot([30, 30], [0, max(absNash[i])*1.1], color = (0,0,0), dashes = [2, 2], linewidth = 2.0)
     #------------------------------------------------------------------#
     thisAx2 = thisAx.twinx()
     thisAx2.set_ylabel('Relative Nash Distance (%)')
-    thisAx2.plot(timeStep, rltNash[i], color = (0,1,0), label = 'Rlt Nash Distance', dashes = [10, 5], linewidth = 2.0)
+    thisAx2.plot(timeStep, rltNash[i], color = (1,0,0), label = 'Rlt Nash Distance', dashes = [10, 5], linewidth = 2.0)
     thisAx.set_title('Nash Distance for app user percentage {}%'.format(percentage[i]))
     hand1, lab1 = thisAx.get_legend_handles_labels()
     hand2, lab2 = thisAx2.get_legend_handles_labels()
