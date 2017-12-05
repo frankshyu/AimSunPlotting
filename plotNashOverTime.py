@@ -234,10 +234,15 @@ def generatePlot(percentage, timeStep, absNash, rltNash):
     thisAx = plt.subplot(3, 4, i + 1)
     thisAx.set_xlabel('Time Step (#)')
     thisAx.set_ylabel('Absolute Nash Distance (sec)')
-    thisAx.plot(timeStep, absNash[i], color = (1,0,0), label = 'Abs Nash Distance', dashes = [10, 5], linewidth = 2.0)
+    thisAx.plot(timeStep, absNash[i], color = (0,0,1), label = 'Abs Nash Distance', dashes = [10, 5], linewidth = 2.0)
+    thisAx.set_ylim(0, max(absNash[i])*1.1)
+    # THIS LINE IS ONLY FOR PLOTTING A SINGLE LINE THAT REPRESENTS THE #
+    # START OF THE ACCIDENT, THIS IS NOT FOR ANY GENERALIZED PLOTTING! #
+    thisAx.plot([30, 30], [0, max(absNash[i])*1.1], color = (1,0,0), dashes = [2, 2], linewidth = 2.0)
+    #------------------------------------------------------------------#
     thisAx2 = thisAx.twinx()
     thisAx2.set_ylabel('Relative Nash Distance (%)')
-    thisAx2.plot(timeStep, rltNash[i], color = (0,1,0), label = 'Rlt Nash Distance', dashes = [2, 2], linewidth = 2.0)
+    thisAx2.plot(timeStep, rltNash[i], color = (0,1,0), label = 'Rlt Nash Distance', dashes = [10, 5], linewidth = 2.0)
     thisAx.set_title('Nash Distance for app user percentage {}%'.format(percentage[i]))
     hand1, lab1 = thisAx.get_legend_handles_labels()
     hand2, lab2 = thisAx2.get_legend_handles_labels()
@@ -245,8 +250,25 @@ def generatePlot(percentage, timeStep, absNash, rltNash):
     dummy       = plt.gca().add_artist(firstLegend)
     plt.legend(handles = hand2, loc = 2)
   plt.show()
-  plt.figure(2)
-  plt.plot([1, 2, 3], [2, 4, 8])
+  font = {'family':'normal',
+          'weight':'bold',
+          'size':14}
+  plt.rc('font', **font)
+  fig, ax = plt.subplots()
+  for i in xrange(len(percentage)):
+    ax.plot(timeStep, absNash[i], color = (1 - float(percentage[i])/100, 0, float(percentage[i])/100), \
+             label = 'Abs Nash Distance of percentage {}'.format(percentage[i]), \
+             linewidth = 2.0)
+    hand, lab = ax.get_legend_handles_labels()
+    plt.legend(handles = hand, loc = 1)
+  ax.set_ylim(0, max(max(absNash)) * 1.1)
+  ax.set_xlabel('Time Step (#)')
+  ax.set_ylabel('Absolute Nash Distance (sec)')
+  ax.set_title('Absolute Nash Distance for different percentages of app user')
+  # THIS LINE IS ONLY FOR PLOTTING A SINGLE LINE THAT REPRESENTS THE #
+  # START OF THE ACCIDENT, THIS IS NOT FOR ANY GENERALIZED PLOTTING! #
+  ax.plot([30, 30], [0, max(max(absNash)) * 1.1], color = (0, 0, 0), dashes = [2, 2], linewidth = 2.0)
+  #------------------------------------------------------------------#
   plt.show()
 
 def getCsvOutputName(dirName):
